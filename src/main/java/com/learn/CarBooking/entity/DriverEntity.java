@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name = "driver")
+@Table(name = "driver", uniqueConstraints = @UniqueConstraint(name = "driver_phone_number_unique", columnNames = "driver_phone_number"))
 public class DriverEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

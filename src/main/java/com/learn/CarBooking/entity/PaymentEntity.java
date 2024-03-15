@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name = "payment")
+@Table(name = "payment", uniqueConstraints = @UniqueConstraint(name = "booking_records_id_unique", columnNames = "booking_records_id"))
 public class PaymentEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
