@@ -33,4 +33,6 @@ public class BCCDMappingEntity {
   @Column(name = "car_id")
   private Long carId;
 
+  @Column(name = "rideRating")
+  private Double rideRating;
 }
