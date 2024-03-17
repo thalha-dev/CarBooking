@@ -15,4 +15,7 @@ public interface BookingRecordsRepository extends JpaRepository<BookingRecordsEn
   List<BookingRecordsEntity> findBookingsConflictingWithStartDate(@Param("startDate") Date startDate,
       @Param("endDate") Date endDate);
 
+  @Query("SELECT b from BookingRecordsEntity b where b.journeyStartDate <= :currentDate and b.journeyEndDate >= :currentDate")
+  List<BookingRecordsEntity> findBookingsInTravel(@Param("currentDate") Date currentDate);
+
 }

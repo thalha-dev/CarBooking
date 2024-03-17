@@ -1,6 +1,6 @@
 ## Requirements
 
-[]. When I want to book car, I'll give date, it should return available cars with drivers based on the rating order
+[x]. When I want to book car, I'll give date, it should return available cars with drivers based on the rating order
 
 #### query
 
@@ -12,11 +12,11 @@
 
 #### functional
 
-[]. when i get all drivers details, it should show with overall rating for each drivers
+[x]. when i get all drivers details, it should show with overall rating for each drivers
 
 #### query
 
-[]. Get all booked cars which is in travelling, car number, start location, drop location, driver name, payment amount.
+[x]. Get all booked cars which is in travelling, car number, start location, drop location, driver name, payment amount.
 
 #### query
 

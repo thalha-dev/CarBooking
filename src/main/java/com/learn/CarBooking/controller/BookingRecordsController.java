@@ -1,6 +1,7 @@
 package com.learn.CarBooking.controller;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -297,6 +299,39 @@ public class BookingRecordsController {
 
     return new ResponseEntity<>(response, HttpStatus.OK);
 
+  }
+
+  @GetMapping("/bookingRecords/bookedCarsInTravel")
+  public ResponseEntity<?> getBookedCarsInTravel(@RequestParam("givenDate") Date givenDate) {
+    // Fetch all bookings that are currently in travel
+    List<BookingRecordsEntity> bookingsInTravel = bookingRecordsRepository.findBookingsInTravel(givenDate);
+
+    // Prepare the response
+    Map<Long, List<Map<String, Object>>> response = new HashMap<>();
+
+    for (BookingRecordsEntity booking : bookingsInTravel) {
+      List<BCCDMappingEntity> mappings = bccdMappingRepository.findBCCDMappingsByBookingId(booking.getId());
+      List<Map<String, Object>> bookingInfos = new ArrayList<>();
+      for (BCCDMappingEntity mapping : mappings) {
+        Map<String, Object> bookingInfo = new HashMap<>();
+        CarEntity car = carRepository.findById(mapping.getCarId()).orElse(null);
+        DriverEntity driver = driverRepository.findById(mapping.getDriverId()).orElse(null);
+        LocationEntity location = locationRepository.findById(booking.getLocation().getId()).orElse(null);
+        PaymentEntity payment = paymentRepository.findById(booking.getPayment().getId()).orElse(null);
+
+        bookingInfo.put("carNumber", car.getCarNumber());
+        bookingInfo.put("startLocation", location.getPickupLocalAddress());
+        bookingInfo.put("dropLocation", location.getDropLocalAddress());
+        if (driver != null) {
+          bookingInfo.put("driverName", driver.getDriverName());
+        }
+        bookingInfo.put("paymentAmount", payment.getTotalCharge());
+        bookingInfos.add(bookingInfo);
+      }
+      response.put(booking.getId(), bookingInfos);
+    }
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
 }
