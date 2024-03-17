@@ -28,10 +28,6 @@ public class DriverEntity {
   @Column(name = "driver_phone_number")
   private Long driverPhoneNumber;
 
-  // inDuty or notInDuty
-  @Column(name = "driver_current_status")
-  private String driverCurrentStatus;
-
   @Column(name = "driver_avg_rating")
   private Double avgRating;
 }

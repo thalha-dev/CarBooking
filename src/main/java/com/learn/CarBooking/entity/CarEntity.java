@@ -31,10 +31,6 @@ public class CarEntity {
   @Column(name = "car_type")
   private String carType;
 
-  // inUse or notInUse
-  @Column(name = "car_current_status")
-  private String carCurrentStatus;
-
   @Column(name = "price_per_km")
   private Integer pricePerKm;
 
