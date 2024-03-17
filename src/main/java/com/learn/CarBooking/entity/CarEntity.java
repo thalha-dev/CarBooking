@@ -34,4 +34,6 @@ public class CarEntity {
   @Column(name = "price_per_km")
   private Integer pricePerKm;
 
+  @Column(name = "car_number")
+  private String carNumber;
 }
