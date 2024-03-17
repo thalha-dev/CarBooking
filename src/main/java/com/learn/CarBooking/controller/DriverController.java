@@ -42,6 +42,7 @@ public class DriverController {
   @GetMapping("/drivers/getAllDrivers")
   public ResponseEntity<List<DriverEntity>> getAllDrivers() {
     List<DriverEntity> drivers = driverRepository.findAll();
+    drivers.sort((d1, d2) -> Double.compare(d2.getAvgRating(), d1.getAvgRating()));
     return new ResponseEntity<>(drivers, HttpStatus.OK);
   }
 }
