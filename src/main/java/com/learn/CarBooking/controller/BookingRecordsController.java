@@ -1,18 +1,23 @@
 package com.learn.CarBooking.controller;
 
+import java.sql.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.learn.CarBooking.dto.endpoint.bookingRecords.BookCarFormDto;
@@ -258,4 +263,40 @@ public class BookingRecordsController {
       return new ResponseEntity<>("Booking Not Found", HttpStatus.NOT_FOUND);
     }
   }
+
+  @GetMapping("/bookingRecords/availableCarsAndDrivers")
+  public ResponseEntity<?> getAvailableCarsAndDrivers(
+      @RequestParam("startDate") Date startDate, @RequestParam("endDate") Date endDate) {
+    List<BookingRecordsEntity> bookingsInConflict = bookingRecordsRepository
+        .findBookingsConflictingWithStartDate(startDate, endDate);
+
+    List<Long> occupiedCarIds = bookingsInConflict.stream()
+        .flatMap(booking -> bccdMappingRepository.findBCCDMappingsByBookingId(booking.getId()).stream())
+        .map(mapping -> mapping.getCarId())
+        .collect(Collectors.toList());
+
+    List<Long> occupiedDriverIds = bookingsInConflict.stream()
+        .flatMap(booking -> bccdMappingRepository.findBCCDMappingsByBookingId(booking.getId()).stream())
+        .map(mapping -> mapping.getDriverId())
+        .filter(id -> id != null)
+        .collect(Collectors.toList());
+
+    List<CarEntity> availableCars = carRepository.findAll().stream()
+        .filter(car -> !occupiedCarIds.contains(car.getId()))
+        .collect(Collectors.toList());
+
+    List<DriverEntity> availableDrivers = driverRepository.findAll().stream()
+        .filter(driver -> !occupiedDriverIds.contains(driver.getId()))
+        .collect(Collectors.toList());
+
+    availableDrivers.sort((d1, d2) -> Double.compare(d2.getAvgRating(), d1.getAvgRating()));
+
+    Map<String, List<?>> response = new HashMap<>();
+    response.put("availableCars", availableCars);
+    response.put("availableDrivers", availableDrivers);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
+
+  }
+
 }
