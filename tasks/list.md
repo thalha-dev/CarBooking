@@ -20,7 +20,7 @@
 
 #### query
 
-[]. Get all booked cars which is not in travelling, car number, start location, drop location, driver name, payment amount.
+[x]. Get all booked cars which is not in travelling, car number, start location, drop location, driver name, payment amount.
 
 #### query
 

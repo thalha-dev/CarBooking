@@ -334,4 +334,39 @@ public class BookingRecordsController {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  @GetMapping("/bookingRecords/bookedCarsNotInTravel")
+  public ResponseEntity<?> getBookedCarsNotInTravel(@RequestParam("startDate") Date startDate,
+      @RequestParam("endDate") Date endDate) {
+    // Fetch all bookings that are currently not in travel but booked for other
+    // rides
+    List<BookingRecordsEntity> bookingsInTravel = bookingRecordsRepository.findBookingsNotInTravel(startDate, endDate);
+
+    // Prepare the response
+    Map<Long, List<Map<String, Object>>> response = new HashMap<>();
+
+    for (BookingRecordsEntity booking : bookingsInTravel) {
+      List<BCCDMappingEntity> mappings = bccdMappingRepository.findBCCDMappingsByBookingId(booking.getId());
+      List<Map<String, Object>> bookingInfos = new ArrayList<>();
+      for (BCCDMappingEntity mapping : mappings) {
+        Map<String, Object> bookingInfo = new HashMap<>();
+        CarEntity car = carRepository.findById(mapping.getCarId()).orElse(null);
+        DriverEntity driver = driverRepository.findById(mapping.getDriverId()).orElse(null);
+        LocationEntity location = locationRepository.findById(booking.getLocation().getId()).orElse(null);
+        PaymentEntity payment = paymentRepository.findById(booking.getPayment().getId()).orElse(null);
+
+        bookingInfo.put("carNumber", car.getCarNumber());
+        bookingInfo.put("startLocation", location.getPickupLocalAddress());
+        bookingInfo.put("dropLocation", location.getDropLocalAddress());
+        if (driver != null) {
+          bookingInfo.put("driverName", driver.getDriverName());
+        }
+        bookingInfo.put("paymentAmount", payment.getTotalCharge());
+        bookingInfos.add(bookingInfo);
+      }
+      response.put(booking.getId(), bookingInfos);
+    }
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
 }
