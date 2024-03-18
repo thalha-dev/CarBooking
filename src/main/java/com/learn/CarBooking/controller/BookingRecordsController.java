@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -367,6 +368,48 @@ public class BookingRecordsController {
     }
 
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @PutMapping("/bookingRecords/cancelBooking/{bookingId}")
+  public ResponseEntity<?> cancelBooking(@PathVariable Long bookingId) {
+
+    Optional<BookingRecordsEntity> bookingOpt = bookingRecordsRepository.findById(bookingId);
+    if (!bookingOpt.isPresent()) {
+      return new ResponseEntity<>("Booking not found", HttpStatus.NOT_FOUND);
+    }
+    BookingRecordsEntity booking = bookingOpt.get();
+
+    List<BCCDMappingEntity> mappings = bccdMappingRepository.findBCCDMappingsByBookingId(booking.getId());
+
+    CustomerEntity customer = customerRepository.findById(mappings.get(0).getCustomerId()).orElse(null);
+    if (customer == null) {
+      return new ResponseEntity<>("Customer not found", HttpStatus.NOT_FOUND);
+    }
+
+    booking.setCancellationStatus("YES");
+    bookingRecordsRepository.save(booking);
+
+    Optional<PaymentEntity> paymentOpt = paymentRepository.findById(booking.getPayment().getId());
+    if (!paymentOpt.isPresent()) {
+      return new ResponseEntity<>("Payment not found", HttpStatus.NOT_FOUND);
+    }
+    PaymentEntity payment = paymentOpt.get();
+
+    payment.setPaymentCurrentStatus("cancelled");
+    paymentRepository.save(payment);
+
+    String emailContent = "<h1 style='background: black;color: white;padding: 1em;'>Your booking has been cancelled!</h1>"
+        +
+        "<p style='background: lightgreen;padding: 1em;'>Booked "
+        + (booking.getNumberOfSUV() + booking.getNumberOfMini()) + " cars for the date "
+        + booking.getJourneyStartDate() + " has been cancelled </p>";
+
+    String emailStatus = emailService.sendMail(null, customer.getCustomerEmail(), null, "Booking Cancellation",
+        emailContent);
+
+    logger.info("Email Status: {}", emailStatus);
+
+    return new ResponseEntity<>("Booking cancelled successfully", HttpStatus.OK);
   }
 
 }

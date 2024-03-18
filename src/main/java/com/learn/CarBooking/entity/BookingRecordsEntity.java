@@ -49,4 +49,8 @@ public class BookingRecordsEntity {
   @JoinColumn(name = "booking_records_id")
   private LocationEntity location;
 
+  // 'YES or null'
+  @Column(name = "cancellation_status")
+  private String cancellationStatus;
+
 }
