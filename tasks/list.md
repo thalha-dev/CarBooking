@@ -24,6 +24,6 @@
 
 #### query
 
-[]. If trip cancelled or booked successfully, the details should send in email with booking details.
+[x]. If trip cancelled or booked successfully, the details should send in email with booking details.
 
 #### functional
